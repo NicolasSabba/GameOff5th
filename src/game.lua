@@ -40,7 +40,7 @@ local function goodRand()
 end
 
 local function newAliens()
-    -- aliens colors
+    -- Aliens colors
     local color = {}
     color[1] = {255,0,0}
     color[2] = {255,255,0}
@@ -48,7 +48,7 @@ local function newAliens()
     color[4] = {0,255,255}
     color[5] = {0,0,255}
 
-    -- aliens information
+    -- Aliens information
     local aliens = {}
     for x=1, 12 do
         aliens[x] = {}
@@ -61,7 +61,7 @@ local function newAliens()
         end
     end
 
-    -- general position of the aliens
+    -- General position of the aliens
     posX, posY = 0, 0
 
     return aliens
@@ -233,21 +233,21 @@ function game:load()
     aliensFirerateMax = 21
     alienSpeed = 1
 
-    -- load img
+    -- Load img
     spriteSheet = love.graphics.newImage('asset/aliens.png')
     spriteSheet:setFilter('nearest','nearest')
 
-    -- make quads
+    -- Make quads
     player = love.graphics.newQuad(0,  0, 16, 16, spriteSheet:getDimensions())
     heart  = love.graphics.newQuad(32, 0, 16, 16, spriteSheet:getDimensions())
     alien  = love.graphics.newQuad(16, 0, 16, 16, spriteSheet:getDimensions())
 
     aliensInfo = newAliens()
 
-    -- sprite batch
+    -- Sprite batch
     batch = love.graphics.newSpriteBatch(spriteSheet, 60)    
 
-    -- left or rigth
+    -- Left or rigth
     lor = true
 
     -- Update batch
@@ -261,11 +261,11 @@ function game:load()
     score = 0
     lvl = 1
 
-    -- bullets
+    -- Bullets
     playerBullets = {}
     aliensBullets = {}
 
-    -- ui canvas
+    -- Ui canvas
     uiCanvas = {}
     uiCanvas.canvas = love.graphics.newCanvas(174, 400)
     function uiCanvas.update()
@@ -328,23 +328,23 @@ function game:draw()
     love.graphics.push()
     love.graphics.scale(1.5,1.5)
 
-    -- player bullet
+    -- Player bullet
     for _, bullet in pairs(playerBullets) do
         love.graphics.rectangle('fill', bullet.x, bullet.y, 2, 5)
     end
 
-    -- player
+    -- Player
     love.graphics.draw(spriteSheet, player, 10 + position, 375)
 
-    -- alien bullet
+    -- Alien bullet
     for _, bullet in pairs(aliensBullets) do
         love.graphics.rectangle('fill', bullet.x, bullet.y, 2, 5)
     end
 
-    -- aliens
+    -- Aliens
     love.graphics.draw(batch, 0 ,0)
 
-    -- uiCanvas
+    -- Ui anvas
     love.graphics.draw(uiCanvas.canvas, 360, 0)
     love.graphics.printf(score, 360, 70, 174, 'center')
 
