@@ -60,9 +60,12 @@ local function newAliens()
             aliens[x][y].y = y
         end
     end
+
+    -- general position of the aliens
+    posX, posY = 0, 0
+
     return aliens
 end
-
 
 ----------------------------------------
 ----------------------------------------
@@ -72,6 +75,7 @@ local function startgame()
 end
 
 local function play(dt)
+
     input:updateInput()
 
     playerFirerate = playerFirerate - dt
@@ -84,19 +88,17 @@ local function play(dt)
     end
     if (posX > 100) or (posX < 0) then
         lor = not lor
+        if posX < 0 then posX = 0 else posX = 100 end
         posY = posY + 20
         alienSpeed = alienSpeed + 0.01
     end
-
-    local pX = posX * 1
-    local pY = posY * 1
 
     -- Alien shut
     for x, _ in pairs(aliensInfo) do
         for y, _ in pairs(aliensInfo[x]) do
                 aliensInfo[x][y].firerate = aliensInfo[x][y].firerate - dt
                 if aliensInfo[x][y].firerate < 0 then
-                    aliensShut(10 + 20 * (aliensInfo[x][y].x - 1) + pX, 10 + 20 * (aliensInfo[x][y].y -1) + pY)
+                    aliensShut(10 + 20 * (aliensInfo[x][y].x - 1) + posX, 10 + 20 * (aliensInfo[x][y].y -1) + posY)
                     aliensInfo[x][y].firerate = goodRand()
             end
         end
@@ -127,8 +129,11 @@ local function play(dt)
         playerFirerate = 0.5
         playerShut()
     end
-    if input:isDown('e') and (playerFirerate < 0) then
-        return 'game'
+    if input:isReleased('e') and (especial > 0) then
+        while #aliensBullets > 0 do
+            table.insert(playerBullets, aliensBullets[1])
+            table.remove(aliensBullets, 1)            
+        end
     end
 
     -- Update player bullet
@@ -140,13 +145,13 @@ local function play(dt)
             -- Chec colition whit alien
             for x, _ in pairs(aliensInfo) do
                 for y, _ in pairs(aliensInfo[x]) do
-                    local alienX = 10 + 20 * (aliensInfo[x][y].x - 1) + pX
-                    local alienY = 10 + 20 * (aliensInfo[x][y].y - 1) + pY
+                    local alienX = 10 + 20 * (aliensInfo[x][y].x - 1) + posX
+                    local alienY = 10 + 20 * (aliensInfo[x][y].y - 1) + posY
                         if (bullet.x > alienX)
                            and (bullet.x < (alienX + 16)) 
                            and (bullet.y < (alienY + 16))
                            and (bullet.y > alienY) then
-                            score = score + (100 * aliensInfo[x][y].y)
+                            score = score + (100 * aliensInfo[x][y].y * lvl)
                             aliensFirerateMax = aliensFirerateMax - 0.33333
                             table.remove(playerBullets, key)
                             table.remove(aliensInfo[x], y)
@@ -155,13 +160,36 @@ local function play(dt)
                 end
             end
         end
-    
+
     -- Update aliens
     updateBatchAliens()
+    if     #aliensInfo[1] == 0 
+    and #aliensInfo[2] == 0
+    and #aliensInfo[3] == 0
+    and #aliensInfo[4] == 0 
+    and #aliensInfo[5] == 0 then
+        posX, posY = 0, 0
+        return 'next'
+    end
+
 end
 
 local function pause()
 
+end
+
+local function next()
+    lvl = lvl + 1    
+    aliensFirerateMax = 21
+    aliensInfo = nil
+    playerBullets = nil
+    aliensBullets = nil
+    collectgarbage('collect')
+    aliensInfo = newAliens()
+    playerBullets = {}
+    aliensBullets = {}
+    uiCanvas.update()
+    return 'play'
 end
 ----------------------------------------
 ----------------------------------------
@@ -191,8 +219,6 @@ function game:load()
     -- sprite batch
     batch = love.graphics.newSpriteBatch(spriteSheet, 60)    
 
-    -- variables for title batch control
-    posX, posY = 0, 0
     -- left or rigth
     lor = true
 
@@ -235,13 +261,19 @@ function game:load()
         love.graphics.setCanvas()
     end
     uiCanvas.update()
-    
+   
+    -- Game state
+    state = 'play'
 
 end
 
 function game:update(dt)
 
-    play(dt)
+    if state == 'play' then  
+       state = play(dt) or state
+    elseif state == 'next'then
+        state = next() or state
+    end
 
 end
 
