@@ -2,7 +2,7 @@ local game = {}
 
 local input, spriteSheet,player, heart, alien, aliensInfo, batch, posX, posY, playerFirerate
 local position, life, aliensFirerateMax, alienSpeed, playerBullets, aliensBullets, lor, especial
-local lvl, score
+local lvl, score, uiCanvas, state
 
 ----------------------------------------
 ------------Helper func-----------------
@@ -19,14 +19,14 @@ local function updateBatchAliens()
     batch:flush()
 end
 
-local function playerShut()
+local function playershoot()
     local bullet = {}
     bullet.x = position + 17
     bullet.y = 375
     table.insert(playerBullets, bullet)
 end
 
-local function aliensShut(x, y)
+local function aliensshoot(x, y)
     local bullet = {}
     bullet.x = x + 8
     bullet.y = y
@@ -70,8 +70,11 @@ end
 ----------------------------------------
 ----------------------------------------
 
-local function startgame()
-
+local function start()
+    input:updateInput()
+    if input:isDown('space') then
+        return 'play'
+    end
 end
 
 local function play(dt)
@@ -80,39 +83,7 @@ local function play(dt)
 
     playerFirerate = playerFirerate - dt
 
-    -- Update aliens position
-    if lor then
-        posX = posX + (20 * dt * alienSpeed)
-    else
-        posX = posX - (20 * dt * alienSpeed)
-    end
-    if (posX > 100) or (posX < 0) then
-        lor = not lor
-        if posX < 0 then posX = 0 else posX = 100 end
-        posY = posY + 20
-        alienSpeed = alienSpeed + 0.01
-    end
-
-    -- Alien shut
-    for x, _ in pairs(aliensInfo) do
-        for y, _ in pairs(aliensInfo[x]) do
-                aliensInfo[x][y].firerate = aliensInfo[x][y].firerate - dt
-                if aliensInfo[x][y].firerate < 0 then
-                    aliensShut(10 + 20 * (aliensInfo[x][y].x - 1) + posX, 10 + 20 * (aliensInfo[x][y].y -1) + posY)
-                    aliensInfo[x][y].firerate = goodRand()
-            end
-        end
-    end
-
-    -- Update aliens bullets
-    for key, bullet in pairs(aliensBullets) do
-        bullet.y = bullet.y + (200 * dt)
-        if bullet.y > 400 then
-            table.remove(aliensBullets, key)
-        end
-    end
-
-    -- Update player
+    -- Imputs
     if input:isDown('a') then
         position = position - (120 * dt)
         if position < 0 then
@@ -127,12 +98,59 @@ local function play(dt)
     end
     if input:isDown('space') and (playerFirerate < 0) then
         playerFirerate = 0.5
-        playerShut()
+        playershoot()
+    end
+    if input:isDown('p') then
+        return 'pause'
     end
     if input:isReleased('e') and (especial > 0) then
         while #aliensBullets > 0 do
             table.insert(playerBullets, aliensBullets[1])
-            table.remove(aliensBullets, 1)            
+            table.remove(aliensBullets, 1)   
+        end
+        especial = especial - 1
+        uiCanvas.update()
+    end
+
+    -- Update aliens position
+    if lor then
+        posX = posX + (20 * dt * alienSpeed)
+    else
+        posX = posX - (20 * dt * alienSpeed)
+    end
+    if (posX > 100) or (posX < 0) then
+        lor = not lor
+        if posX < 0 then posX = 0 else posX = 100 end
+        posY = posY + 20
+        alienSpeed = alienSpeed + 0.02
+    end
+
+    -- Alien shoot
+    for x, _ in pairs(aliensInfo) do
+        for y, _ in pairs(aliensInfo[x]) do
+                aliensInfo[x][y].firerate = aliensInfo[x][y].firerate - dt
+                if aliensInfo[x][y].firerate < 0 then
+                    aliensshoot(10 + 20 * (aliensInfo[x][y].x - 1) + posX, 10 + 20 * (aliensInfo[x][y].y -1) + posY)
+                    aliensInfo[x][y].firerate = goodRand()
+            end
+        end
+    end
+
+    -- Update aliens bullets
+    for key, bullet in pairs(aliensBullets) do
+        bullet.y = bullet.y + (200 * dt)
+        if bullet.y > 400 then
+            table.remove(aliensBullets, key)
+        elseif (bullet.y > 375) and
+               (bullet.y < 391) and
+               (bullet.x > 10 + position) and
+               (bullet.x < 26 + position) then
+                    life = life - 1
+                    table.remove(aliensBullets, key)
+                    uiCanvas.update()
+                    if life < 0 then
+                        return 'laderboard'
+                    end
         end
     end
 
@@ -163,11 +181,18 @@ local function play(dt)
 
     -- Update aliens
     updateBatchAliens()
-    if     #aliensInfo[1] == 0 
+    if  #aliensInfo[1] == 0 
     and #aliensInfo[2] == 0
     and #aliensInfo[3] == 0
     and #aliensInfo[4] == 0 
-    and #aliensInfo[5] == 0 then
+    and #aliensInfo[5] == 0
+    and #aliensInfo[6] == 0
+    and #aliensInfo[7] == 0
+    and #aliensInfo[8] == 0
+    and #aliensInfo[9] == 0
+    and #aliensInfo[10] == 0
+    and #aliensInfo[11] == 0
+    and #aliensInfo[12] == 0 then
         posX, posY = 0, 0
         return 'next'
     end
@@ -176,18 +201,21 @@ end
 
 local function pause()
 
+    input:updateInput()
+    if input:isDown('space') then
+        return 'play'
+    end
+    if input:isDown('e') then
+        return 'menu'
+    end
+
 end
 
 local function next()
     lvl = lvl + 1    
+    especial = especial + 1
     aliensFirerateMax = 21
-    aliensInfo = nil
-    playerBullets = nil
-    aliensBullets = nil
-    collectgarbage('collect')
     aliensInfo = newAliens()
-    playerBullets = {}
-    aliensBullets = {}
     uiCanvas.update()
     return 'play'
 end
@@ -261,9 +289,19 @@ function game:load()
         love.graphics.setCanvas()
     end
     uiCanvas.update()
-   
+
+    startCanvas = love.graphics.newCanvas(212, 150)
+    love.graphics.setCanvas(startCanvas)
+        love.graphics.printf('WASD - move\nSpace - shoot\nE - special\nP - pause\nSpace to continue', 0, 0, 212, 'center')
+    love.graphics.setCanvas()
+
+    pauseCanvas = love.graphics.newCanvas(212, 60)
+    love.graphics.setCanvas(pauseCanvas)
+        love.graphics.printf('Space to continue\nE to exit', 0, 0, 212, 'center')
+    love.graphics.setCanvas()
+
     -- Game state
-    state = 'play'
+    state = 'start'
 
 end
 
@@ -271,8 +309,16 @@ function game:update(dt)
 
     if state == 'play' then  
        state = play(dt) or state
+    elseif state == 'start' then
+        state = start() or state
+    elseif state == 'pause'then
+        state = pause() or state
     elseif state == 'next'then
         state = next() or state
+    elseif state == 'menu'then
+        return 'menu'
+    elseif state == 'laderboard'then
+        return 'laderboard', score
     end
 
 end
@@ -301,6 +347,12 @@ function game:draw()
     -- uiCanvas
     love.graphics.draw(uiCanvas.canvas, 360, 0)
     love.graphics.printf(score, 360, 70, 174, 'center')
+
+    if state == 'pause' then
+        love.graphics.draw(pauseCanvas, 74, (wh/2 - 30)/1.5)
+    elseif state == 'start' then
+        love.graphics.draw(startCanvas, 74, (wh/2 - 75)/1.5)
+    end
 
     love.graphics.pop()
 
