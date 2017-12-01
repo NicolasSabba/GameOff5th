@@ -14,14 +14,15 @@ local function menuCanvasUpdate(num)
         love.graphics.setColor(255, 255, 255)
         love.graphics.print('Start', 16, 0)
         love.graphics.print('Options', 16, fh)
-        love.graphics.print('Exit', 16, fh*2)
+        love.graphics.print('Leaderboard',16, fh*2)
+        love.graphics.print('Exit', 16, fh*3)
     love.graphics.setCanvas()
 end
 
 local function optUpdate(num)
     opt = opt + num
-    if opt < 0 then opt = 2 end
-    if opt > 2 then opt = 0 end
+    if opt < 0 then opt = 3 end
+    if opt > 3 then opt = 0 end
 end
 
 local function quit(newState)
@@ -45,10 +46,10 @@ function menu:load()
     input = require('simpleKey')
     input:keyInit({'w', 's', 'return'})
 
-    fw = front:getWidth('Options')
+    fw = front:getWidth('Leaderboard')
     fh = front:getHeight(' ')
 
-    menuCanvas = love.graphics.newCanvas(fw + 16, fh * 3)
+    menuCanvas = love.graphics.newCanvas(fw + 16, fh * 4)
     opt = 0
     menuCanvasUpdate(opt)
 
@@ -71,7 +72,8 @@ function menu:update(dt)
     -- Select an option
     if input:isReleased('return') and opt == 0 then return quit('game') end
     if input:isReleased('return') and opt == 1 then return quit('options') end
-    if input:isReleased('return') and opt == 2 then love.event.quit() end
+    if input:isReleased('return') and opt == 2 then return quit('leaderboard') end
+    if input:isReleased('return') and opt == 3 then love.event.quit() end
 
 end
 

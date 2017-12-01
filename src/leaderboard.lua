@@ -1,6 +1,6 @@
 local leaderboard = {}
 
-local scores, position, canvas, fh, input, keyAll
+local scores, position, canvas, fh, input, keyAll, look
 
 ----------------------------------------------------------
 -------------Help Function--------------------------------
@@ -48,7 +48,9 @@ function leaderboard:load(newScore)
     input:keyInit({'return','backspace'})
     input:keyBind(keyAll)
 
+    look = newScore
     newScore = newScore or -1
+    
 
     if love.filesystem.exists('leaderboardInfo.lua') then
         scores = love.filesystem.load('leaderboardInfo.lua')
@@ -108,7 +110,9 @@ end
 function leaderboard:draw()
 
     love.graphics.draw(canvas, 0, (wh/2) - (fh*5) )
-    if position == 11 then
+    if not look then
+        love.graphics.printf('Best scores', 0, 0, 800, 'center')
+    elseif position == 11 then
         love.graphics.printf('Better luck next time', 0, 0, 800, 'center')
     else
         love.graphics.printf('Congratulations!!\nEnter your name:', 0, 0, 800, 'center')
