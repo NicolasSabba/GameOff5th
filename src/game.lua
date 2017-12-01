@@ -149,7 +149,7 @@ local function play(dt)
                     table.remove(aliensBullets, key)
                     uiCanvas.update()
                     if life < 0 then
-                        return 'laderboard'
+                        return 'leaderboard'
                     end
         end
     end
@@ -317,8 +317,8 @@ function game:update(dt)
         state = next() or state
     elseif state == 'menu'then
         return 'menu'
-    elseif state == 'laderboard'then
-        return 'laderboard', score
+    elseif state == 'leaderboard'then
+        return 'leaderboard', score
     end
 
 end
