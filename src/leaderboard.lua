@@ -2,6 +2,9 @@ local leaderboard = {}
 
 local scores, position, canvas, fh, input, keyAll
 
+----------------------------------------------------------
+-------------Help Function--------------------------------
+----------------------------------------------------------
 local function saveleaderboard()
 
     if not love.filesystem.exists('leaderboardInfo.lua') then
@@ -16,6 +19,24 @@ local function saveleaderboard()
     data = data .. 'return leaderboard\n'
     love.filesystem.write('leaderboardInfo.lua', data)
 end
+
+local function canvasUpdate()
+    love.graphics.setCanvas(canvas)
+        love.graphics.clear()
+        for i=1, 10 do
+            if i == position then
+                love.graphics.setColor(0, 255, 0)
+                love.graphics.printf(i .. ' - ' .. scores[i].name .. ' ' .. scores[i].score, 0, fh * (i -1), 800, 'center')
+                love.graphics.setColor(255, 255, 255)
+            else
+                love.graphics.printf(i .. ' - ' .. scores[i].name .. ' ' .. scores[i].score, 0, fh * (i -1), 800, 'center')
+            end
+        end
+    love.graphics.setCanvas()
+end
+
+----------------------------------------------------------
+----------------------------------------------------------
 
 function leaderboard:load(newScore)
 
@@ -57,21 +78,8 @@ function leaderboard:load(newScore)
 
     fh = front:getHeight(' ')
     canvas = love.graphics.newCanvas(800, fh * 10)
-    function canvasUpdate()
-        love.graphics.setCanvas(canvas)
-            love.graphics.clear()
-            for i=1, 10 do
-                if i == position then
-                    love.graphics.setColor(0, 255, 0)
-                    love.graphics.printf(i .. ' - ' .. scores[i].name .. ' ' .. scores[i].score, 0, fh * (i -1), 800, 'center')
-                    love.graphics.setColor(255, 255, 255)
-                else
-                    love.graphics.printf(i .. ' - ' .. scores[i].name .. ' ' .. scores[i].score, 0, fh * (i -1), 800, 'center')
-                end
-            end
-        love.graphics.setCanvas()
-    end
     canvasUpdate()
+
 end
 
 function leaderboard:update()
@@ -87,7 +95,6 @@ function leaderboard:update()
             end
         end
         if input:isReleased('backspace') then
-            -- If backsspace remove last charter 
             scores[i].name = string.sub(scores[i].name, 1, -2)
             canvasUpdate()
         end
