@@ -13,6 +13,9 @@ local function updateBatchAliens()
         for y, _ in pairs(aliensInfo[x]) do
             batch:setColor(aliensInfo[x][y].color)
             batch:add(alien, 10 + 20 * (aliensInfo[x][y].x - 1) + posX, 10 + 20 * (aliensInfo[x][y].y -1) + posY)
+            if (10 + 20 * (aliensInfo[x][y].y -1) + posY) >= 375 then
+                life = -1
+            end
         end
     end
     love.graphics.setColor(255,255,255)
@@ -195,6 +198,9 @@ local function play(dt)
     and #aliensInfo[12] == 0 then
         posX, posY = 0, 0
         return 'next'
+    end
+    if life < 0 then
+        return 'leaderboard'
     end
 
 end
