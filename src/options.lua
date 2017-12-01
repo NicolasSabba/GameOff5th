@@ -8,17 +8,6 @@ local input, conf, fh, fw, saveData, complete, time, optionsMenu, state
 
 local function change(amount, dt)
    if optionsMenu.opt == 0 then
-       -- The + 0.1 avoids a bug in math.floor
-       local help = math.floor(sfxV * 100 + amount * 10 + 0.1)
-       if help <= 100 and help >= 0 then
-           sfxV = help/100
-       end
-   elseif optionsMenu.opt == 1 then
-       local help = math.floor(musicV * 100 + amount * 10 + 0.1)
-       if help <= 100 and help >= 0 then
-           musicV = help/100
-       end
-   elseif optionsMenu.opt == 2 then
        local help1, help2 = conf.ww + (200 * amount), conf.wh + (150 * amount)
        local full = conf.full
        if help1 >= 800 and help1 <= 1600 and not full then
@@ -125,8 +114,8 @@ function options:load()
 
     fw = front:getWidth('Screen 1600x1200') + 16
     optionsMenu = {}
-    optionsMenu.canvas = love.graphics.newCanvas(fw,fh*5)
-    optionsMenu.ch = fh*5
+    optionsMenu.canvas = love.graphics.newCanvas(fw,fh*3)
+    optionsMenu.ch = fh*3
     optionsMenu.cw = fw
     optionsMenu.opt = 0
     function optionsMenu.update(num)
@@ -138,19 +127,17 @@ function options:load()
             love.graphics.setColor(141, 153, 255)
             love.graphics.circle('fill', 8, (fh*(num))+(fh/2), 8, 3)
             love.graphics.setColor(255,255,255)
-            love.graphics.print('SFX '.. (sfxV * 100), 16, 0)
-            love.graphics.print('Musica ' .. (musicV * 100), 16, fh)
             screenState()
-            love.graphics.print(conf.screen, 16, fh*2)
+            love.graphics.print(conf.screen, 16, 0)
             optionsMenu.cw = front:getWidth(conf.screen)
-            love.graphics.print('Save', 16, fh*3)
-            love.graphics.print('Menu', 16, fh*4)
+            love.graphics.print('Save', 16, fh)
+            love.graphics.print('Menu', 16, fh*2)
         love.graphics.setCanvas()
     end
     function optionsMenu.optUpdate(num)
         optionsMenu.opt = optionsMenu.opt + num
-        if optionsMenu.opt < 0 then optionsMenu.opt = 4 end
-        if optionsMenu.opt > 4 then optionsMenu.opt = 0 end
+        if optionsMenu.opt < 0 then optionsMenu.opt = 2 end
+        if optionsMenu.opt > 2 then optionsMenu.opt = 0 end
     end
     optionsMenu.update(optionsMenu.opt)
 
@@ -177,10 +164,10 @@ function options:update(dt)
         if input:isReleased('d') then
             change( 1, dt)
         end
-        if input:isReleased('return') and optionsMenu.opt == 3 then 
+        if input:isReleased('return') and optionsMenu.opt == 1 then 
             state = 1
         end
-        if input:isReleased('return') and optionsMenu.opt == 4 then
+        if input:isReleased('return') and optionsMenu.opt == 2 then
             return quit('menu')
         end
     elseif state == 1 then

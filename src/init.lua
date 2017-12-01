@@ -11,8 +11,6 @@ function cons:Init()
     end
     -- Set the configurations options
     Realww, Realwh = ConfSetings.windowsWidth or 800, ConfSetings.windowsHeight or 600
-    musicV = ConfSetings.musicVolume or 1
-    sfxV = ConfSetings.sfxVolume or 1
     fullScreen = ConfSetings.fullScreen or false
     -- Aplly the configuration options
     love.window.setMode(Realww, Realwh,{fullscreen = fullScreen, vsync = false})
@@ -33,8 +31,7 @@ function cons:Save()
         file = love.filesystem.newFile('ConfSetings.lua')
     end
     -- Create a table whit the configurations options and write to the configuration file
-    local data = 'return { \nwindowsWidth = ' .. Realww .. ',\n windowsHeight = ' .. Realwh .. ',\n musicVolume = ' .. musicV
-                .. ',\n sfxVolume = ' .. sfxV .. ',\n fullScreen = '.. tostring(fullScreen) ..'\n}'
+    local data = 'return { \nwindowsWidth = ' .. Realww .. ',\n windowsHeight = ' .. Realwh .. ',\n fullScreen = '.. tostring(fullScreen) ..'\n}'
     love.filesystem.write('ConfSetings.lua', data)
 end
 
